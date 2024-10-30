@@ -3,27 +3,28 @@
 const BallColor = "#cd202c"
 const RacketColor = "#aaaaaa"
 const CanvasColor = "#f1e1e9"
+const LineColor = "#000000"
 
 
 const CanvasWidth = 1000
-const CanvasHeight = 400
+const CanvasHeight = 500
 const CanvasId = "gameCanvas"
 const ContextType = "2d"
 
 const BallStartX = CanvasWidth / 2;
 const BallStartY = CanvasHeight / 2;
-const BallRaduis = 10;
+const BallRaduis = CanvasWidth / 100;
 const VelocityX = 3;
 const VelocityY = 3;
 
 const RacketVelocity = 4
-const RacketWidth = 10
-const RacketHeight = 100
-const RacketStartX = 50
-const RacketStartY = 50
+const RacketWidth = CanvasWidth / 100
+const RacketHeight = CanvasHeight / 6
+const RacketStartX = 40
+const RacketStartY = (CanvasHeight / 2) - (RacketHeight / 2)
 
-const RightUp = "u"
-const RightDown = "j"
+const RightUp = "o"
+const RightDown = "l"
 const LeftUp = "w"
 const LeftDown = "s"
 
@@ -103,12 +104,14 @@ class Racket {
 	{
         if (event.key === this.upkey)
 		{
-            this.y -= this.Velocity;
+			if (this.y > 0)
+            	this.y -= this.Velocity;
         }
 
         if (event.key === this.downkey)
 		{
-            this.y += this.Velocity;
+			if (this.y < this.canvas.height - this.height)
+            	this.y += this.Velocity;
         }
     }
 }
@@ -126,26 +129,34 @@ class Canvas {
 
 	Clear()
 	{
-		this.context.clearRect(0, 0, CanvasWidth, CanvasHeight)
+		this.context.clearRect(0, 0, this.width, this.height)
 	}
 
 	Draw()
 	{
 		this.context.fillStyle = CanvasColor
-		this.context.fillRect(0, 0, CanvasWidth, CanvasHeight)
+		this.context.fillRect(0, 0, this.width, this.height)
+		this.context.fillStyle = LineColor
+		this.context.fillRect(this.width / 2, this.height / 20, 2, this.height - (this.height / 20) * 2)
+
 	}
 }
 
 
 let c = new Canvas(CanvasWidth, CanvasHeight, CanvasId, ContextType)
 
-let ball = new Ball(BallStartX, BallStartY, BallRaduis, VelocityX, VelocityY, BallColor, c)
+let ball = new Ball(BallStartX, BallStartY, BallRaduis,
+					VelocityX, VelocityY, BallColor, c)
 
-let leftRacket = new Racket(RacketStartX, RacketStartY, RacketWidth, RacketHeight,
-							RacketVelocity, RacketColor, c, LeftUp, LeftDown)
+let leftRacket = new Racket(RacketStartX, RacketStartY,
+							RacketWidth, RacketHeight,
+							RacketVelocity, RacketColor, c,
+							LeftUp, LeftDown)
 
-let rightRacket = new Racket(c.width - RacketStartX, RacketStartY, RacketWidth, RacketHeight,
-							RacketVelocity, RacketColor, c, RightUp, RightDown)
+let rightRacket = new Racket(c.width - RacketStartX, RacketStartY,
+							RacketWidth, RacketHeight,
+							RacketVelocity, RacketColor, c,
+							RightUp, RightDown)
 
 
 // game loops :
@@ -154,6 +165,7 @@ function GameUpdate()
 {
 	ball.CheckVelocity()
 	ball.UpdatePosition()
+	// racket update is in the constructor
 }
 
 function GameDraw()
