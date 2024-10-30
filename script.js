@@ -16,11 +16,16 @@ const BallRaduis = 10;
 const VelocityX = 3;
 const VelocityY = 3;
 
-const RacketVelocity = 1
+const RacketVelocity = 4
 const RacketWidth = 10
 const RacketHeight = 100
 const RacketStartX = 50
 const RacketStartY = 50
+
+const RightUp = "u"
+const RightDown = "j"
+const LeftUp = "w"
+const LeftDown = "s"
 
 
 // Classes :
@@ -68,7 +73,7 @@ class Ball {
 }
 
 class Racket {
-	constructor(x, y, width, height, Velocity, color, canvas)
+	constructor(x, y, width, height, Velocity, color, canvas, upkey, downkey)
 	{
 		this.x = x
 		this.y = y
@@ -76,9 +81,16 @@ class Racket {
 		this.height = height
 		this.Velocity = Velocity
 		this.color = color
+		this.upkey = upkey
+		this.downkey = downkey
 
 		this.canvas = canvas
 		this.context = canvas.context
+
+		document.addEventListener("keypress", (event) =>
+		{
+            this.handleKeyUp(event)
+        })
 	}
 
 	Draw()
@@ -86,6 +98,19 @@ class Racket {
 		this.context.fillStyle = this.color
 		this.context.fillRect(this.x, this.y, this.width, this.height)
 	}
+
+	handleKeyUp(event)
+	{
+        if (event.key === this.upkey)
+		{
+            this.y -= this.Velocity;
+        }
+
+        if (event.key === this.downkey)
+		{
+            this.y += this.Velocity;
+        }
+    }
 }
 
 class Canvas {
@@ -113,9 +138,14 @@ class Canvas {
 
 
 let c = new Canvas(CanvasWidth, CanvasHeight, CanvasId, ContextType)
+
 let ball = new Ball(BallStartX, BallStartY, BallRaduis, VelocityX, VelocityY, BallColor, c)
-let leftRacket = new Racket(RacketStartX, RacketStartY, RacketWidth, RacketHeight, RacketVelocity, RacketColor, c)
-let rightRacket = new Racket(c.width - RacketStartX, RacketStartY, RacketWidth, RacketHeight, RacketVelocity, RacketColor, c)
+
+let leftRacket = new Racket(RacketStartX, RacketStartY, RacketWidth, RacketHeight,
+							RacketVelocity, RacketColor, c, LeftUp, LeftDown)
+
+let rightRacket = new Racket(c.width - RacketStartX, RacketStartY, RacketWidth, RacketHeight,
+							RacketVelocity, RacketColor, c, RightUp, RightDown)
 
 
 // game loops :
