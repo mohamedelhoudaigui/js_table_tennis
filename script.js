@@ -161,6 +161,36 @@ class Canvas {
 }
 
 
+class Player {
+	constructor(Id, UserName)
+	{
+		this.Id = Id
+		this.UserName = UserName
+	}
+}
+
+class Match {
+	constructor (PlayerOneName, PlayerTwoName)
+	{
+		this.PlayerOneName = PlayerOneName
+		this.PlayerTwoName = PlayerTwoName
+	}
+
+	SetWinner(PlayerOneScore, PlayerTwoScore)
+	{
+		this.PlayerOneScore = PlayerOneScore
+		this.PlayerTwoScore = PlayerTwoScore
+
+		if (this.PlayerOneScore < this.PlayerTwoScore)
+			this.Winner = this.PlayerTwoName
+		else if (this.PlayerTwoScore < this.PlayerOneScore)
+			this.Winner = this.PlayerOneName
+		else
+			this.Winner = "Draw"
+	}
+}
+
+
 let c = new Canvas(CanvasWidth, CanvasHeight, CanvasId, ContextType)
 
 let ball = new Ball(BallStartX, BallStartY, BallRaduis,
@@ -204,5 +234,7 @@ function GameLoop()
 	GameUpdate()
 	GameDraw()
 }
+
+//
 
 GameLoop()
