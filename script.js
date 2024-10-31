@@ -28,6 +28,8 @@ const RightDown = "l"
 const LeftUp = "w"
 const LeftDown = "s"
 
+let GameEnd = false
+
 
 // Classes :
 
@@ -53,16 +55,31 @@ class Ball {
 		this.context.fill()
 	}
 
-	CheckVelocity()
+	CheckCollitionWall()
 	{
-		if ((this.x >= this.canvas.width - this.raduis) || (this.x <= this.raduis))
+		if ((this.y >= this.canvas.height - this.raduis) ||
+			(this.y <= this.raduis))
+		{
+			this.VelocityY = -(this.VelocityY)
+		}
+		if ((this.x <= this.raduis * 2) ||
+			(this.x >= this.canvas.width - (this.raduis * 2)))
+		{
+			GameEnd = true
+		}
+	}
+
+	CheckCollitionRacket(RightRacket, LeftRacket)
+	{
+		if ((this.x <= LeftRacket.x + (LeftRacket.width / 2 + this.raduis)) &&
+			(this.y >= LeftRacket.y && this.y <= LeftRacket.y + LeftRacket.height)) // the ball center is on the right side
 		{
 			this.VelocityX = -(this.VelocityX)
 		}
-			
-		if ((this.y >= this.canvas.height - this.raduis) || (this.y <= this.raduis))
+		if ((this.x >= RightRacket.x - RightRacket.width / 2) &&
+			(this.y >= RightRacket.y && this.y <= RightRacket.y + RightRacket.height))
 		{
-			this.VelocityY = -(this.VelocityY)
+			this.VelocityX = -(this.VelocityX)	
 		}
 	}
 	
@@ -137,7 +154,8 @@ class Canvas {
 		this.context.fillStyle = CanvasColor
 		this.context.fillRect(0, 0, this.width, this.height)
 		this.context.fillStyle = LineColor
-		this.context.fillRect(this.width / 2, this.height / 20, 2, this.height - (this.height / 20) * 2)
+		this.context.fillRect(this.width / 2, this.height / 20,
+								2, this.height - (this.height / 20) * 2)
 
 	}
 }
@@ -163,7 +181,8 @@ let rightRacket = new Racket(c.width - RacketStartX, RacketStartY,
 
 function GameUpdate()
 {
-	ball.CheckVelocity()
+	ball.CheckCollitionWall()
+	ball.CheckCollitionRacket(rightRacket, leftRacket)
 	ball.UpdatePosition()
 	// racket update is in the constructor
 }
@@ -180,7 +199,8 @@ function GameDraw()
 
 function GameLoop()
 {
-	window.requestAnimationFrame(GameLoop)
+	if (!GameEnd)
+		window.requestAnimationFrame(GameLoop)
 	GameUpdate()
 	GameDraw()
 }
