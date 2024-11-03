@@ -34,7 +34,7 @@ let GameEnd = false
 // Classes :
 
 class Ball {
-	constructor(x, y, raduis, VelocityX, VelocityY, color, canvas)
+	constructor(x, y, raduis, VelocityX, VelocityY, color, canvas, PlayerRight, PlayerLeft)
 	{
 		this.x = x
 		this.y = y
@@ -42,6 +42,8 @@ class Ball {
 		this.VelocityX = VelocityX
 		this.VelocityY = VelocityY
 		this.color = color
+		this.PlayerRight = PlayerRight
+		this.PlayerLeft = PlayerLeft
 
 		this.canvas = canvas
 		this.context = canvas.context
@@ -62,9 +64,14 @@ class Ball {
 		{
 			this.VelocityY = -(this.VelocityY)
 		}
-		if ((this.x <= this.raduis * 2) ||
-			(this.x >= this.canvas.width - (this.raduis * 2)))
+		if (this.x <= this.raduis * 2)
 		{
+			this.PlayerRight.Score += 1
+			GameEnd = true
+		}
+		if (this.x >= this.canvas.width - (this.raduis * 2))
+		{
+			this.PlayerLeft.Score += 1
 			GameEnd = true
 		}
 	}
@@ -166,75 +173,92 @@ class Player {
 	{
 		this.Id = Id
 		this.UserName = UserName
+		this.Score = 0
 	}
 }
 
 class Match {
-	constructor (PlayerOneName, PlayerTwoName)
+
+	constructor (PlayerOne, PlayerTwo)
 	{
-		this.PlayerOneName = PlayerOneName
-		this.PlayerTwoName = PlayerTwoName
+		this.PlayerOne = PlayerOne
+		this.PlayerTwo = PlayerTwo
+		this.MatchSet = 8
+		this.MatchCounter = 0
 	}
 
-	SetWinner(PlayerOneScore, PlayerTwoScore)
+	
+	StartGame()
 	{
-		this.PlayerOneScore = PlayerOneScore
-		this.PlayerTwoScore = PlayerTwoScore
+		this.GameLogic(this.Winner, this.PlayerOne, this.PlayerTwo)
+		// code just runs js doesnt wait for the outcome of the game
+		
+	}
 
-		if (this.PlayerOneScore < this.PlayerTwoScore)
-			this.Winner = this.PlayerTwoName
-		else if (this.PlayerTwoScore < this.PlayerOneScore)
-			this.Winner = this.PlayerOneName
-		else
-			this.Winner = "Draw"
+	GameLogic (Winner, PlayerOne, PlayerTwo)
+	{
+		let c = new Canvas(CanvasWidth, CanvasHeight, CanvasId, ContextType)
+
+		let ball = new Ball(BallStartX, BallStartY, BallRaduis,
+							VelocityX, VelocityY, BallColor, c, 
+							this.PlayerOne, this.PlayerTwo)
+
+		let leftRacket = new Racket(RacketStartX, RacketStartY,
+									RacketWidth, RacketHeight,
+									RacketVelocity, RacketColor, c,
+									LeftUp, LeftDown)
+
+		let rightRacket = new Racket(c.width - RacketStartX, RacketStartY,
+									RacketWidth, RacketHeight,
+									RacketVelocity, RacketColor, c,
+									RightUp, RightDown)
+									
+									
+		function GameUpdate()
+		{
+			ball.CheckCollitionWall()
+			ball.CheckCollitionRacket(rightRacket, leftRacket)
+			ball.UpdatePosition()
+			// racket update is in the constructor
+		}
+		
+		function GameDraw()
+		{
+			c.Clear()
+			
+			c.Draw()
+			ball.Draw()
+			rightRacket.Draw()
+			leftRacket.Draw()
+		}
+
+		function SetWinner()
+		{
+			if (PlayerOne.Score < PlayerTwo.Score)
+				Winner = PlayerTwo.UserName
+			else if (PlayerTwo.Score < PlayerOne.Score)
+				Winner = PlayerOne.UserName
+			else
+				Winner = "Draw"
+		}
+
+		function GameLoop()
+		{
+			if (!GameEnd)
+				window.requestAnimationFrame(GameLoop)
+			else
+				SetWinner()
+			GameUpdate()
+			GameDraw()
+		}
+
+		GameLoop()
 	}
 }
 
 
-let c = new Canvas(CanvasWidth, CanvasHeight, CanvasId, ContextType)
+const one = new Player(1, "Mohamed")
+const two = new Player(2, "Yassine")
 
-let ball = new Ball(BallStartX, BallStartY, BallRaduis,
-					VelocityX, VelocityY, BallColor, c)
-
-let leftRacket = new Racket(RacketStartX, RacketStartY,
-							RacketWidth, RacketHeight,
-							RacketVelocity, RacketColor, c,
-							LeftUp, LeftDown)
-
-let rightRacket = new Racket(c.width - RacketStartX, RacketStartY,
-							RacketWidth, RacketHeight,
-							RacketVelocity, RacketColor, c,
-							RightUp, RightDown)
-
-
-// game loops :
-
-function GameUpdate()
-{
-	ball.CheckCollitionWall()
-	ball.CheckCollitionRacket(rightRacket, leftRacket)
-	ball.UpdatePosition()
-	// racket update is in the constructor
-}
-
-function GameDraw()
-{
-	c.Clear()
-
-	c.Draw()
-	ball.Draw()
-	rightRacket.Draw()
-	leftRacket.Draw()
-}
-
-function GameLoop()
-{
-	if (!GameEnd)
-		window.requestAnimationFrame(GameLoop)
-	GameUpdate()
-	GameDraw()
-}
-
-//
-
-GameLoop()
+const match = new Match(one, two)
+match.StartGame()
