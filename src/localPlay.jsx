@@ -1,81 +1,85 @@
-import './App.css'
+import './App.css';
 import React, { useState } from 'react';
 
-function Square({value, onSclick}) {
+function LocalPlay() {
+  // State to track selected options for each category
+  const [selectedOption, setSelectedOption] = useState({
+    playerType: null,
+    rounds: null,
+    points: null,
+  });
 
-  return (
-      <button className='s'
-      onClick={onSclick}>
-        {value}
-      </button>
-  );
-}
-
-function localPlay() {
-  const [xIsNext, setXIsNext] = useState(true);
-  const [squares, setSquares] = useState(Array(9).fill(null));
-
-  function hClick(i) {
-    if (squares[i] || calculateWinner(squares)) {
-      return;
-    }
-    const nextSquares = squares.slice();
-    if (xIsNext){
-      nextSquares[i] = 'X';
-    } else {
-      nextSquares[i] = 'O';
-    }
-    setSquares(nextSquares);
-    setXIsNext(!xIsNext);
-  }
-
-  const winner = calculateWinner(squares);
-  let status;
-  if (winner) {
-    status = 'Winner: ' + winner;
-  } else {
-    status = 'Next player: ' + (xIsNext ? 'X' : 'O');
-  }
+  // Update state with selected option
+  const handleClick = (category, option) => () => {
+    setSelectedOption((prevState) => ({
+      ...prevState,
+      [category]: option,
+    }));
+  };
 
   return (
     <>
-        <div className="localPlay">
-            <Square value={squares[0]} onSclick={() => hClick(0)}/>
-            <Square value={squares[1]} onSclick={() => hClick(1)}/>
-            <Square value={squares[2]} onSclick={() => hClick(2)}/>
-        </div>
-        <div className="localPlay">
-            <Square value={squares[3]} onSclick={() => hClick(3)}/>
-            <Square value={squares[4]} onSclick={() => hClick(4)}/>
-            <Square value={squares[5]} onSclick={() => hClick(5)}/>
-        </div>
-        <div className="localPlay">
-            <Square value={squares[6]} onSclick={() => hClick(6)}/>
-            <Square value={squares[7]} onSclick={() => hClick(7)}/>
-            <Square value={squares[8]} onSclick={() => hClick(8)}/>
-        </div>
+      <div className="botorfriend">
+        <button
+          className={`button ${selectedOption.playerType === 'bot' ? 'selected' : ''}`}
+          onClick={handleClick('playerType', 'bot')}
+        >
+          Play with Bot
+        </button>
+        <button
+          className={`button ${selectedOption.playerType === 'friend' ? 'selected' : ''}`}
+          onClick={handleClick('playerType', 'friend')}
+        >
+          Play with Friend
+        </button>
+      </div>
+
+      <div className="rounds">
+        <button
+          className={`button ${selectedOption.rounds === 1 ? 'selected' : ''}`}
+          onClick={handleClick('rounds', 1)}
+        >
+          1 Round
+        </button>
+        <button
+          className={`button ${selectedOption.rounds === 3 ? 'selected' : ''}`}
+          onClick={handleClick('rounds', 3)}
+        >
+          3 Rounds
+        </button>
+        <button
+          className={`button ${selectedOption.rounds === 5 ? 'selected' : ''}`}
+          onClick={handleClick('rounds', 5)}
+        >
+          5 Rounds
+        </button>
+      </div>
+
+      <div className="points">
+        <button
+          className={`button ${selectedOption.points === 3 ? 'selected' : ''}`}
+          onClick={handleClick('points', 3)}
+        >
+          3 Points
+        </button>
+        <button
+          className={`button ${selectedOption.points === 5 ? 'selected' : ''}`}
+          onClick={handleClick('points', 5)}
+        >
+          5 Points
+        </button>
+        <button
+          className={`button ${selectedOption.points === 7 ? 'selected' : ''}`}
+          onClick={handleClick('points', 7)}
+        >
+          7 Points
+        </button>
+      </div>
+      <div className='lastdiv'>
+        <button className='startbutton'>start</button>
+      </div>
     </>
-  )
+  );
 }
 
-function calculateWinner(squares) {
-  const lines = [
-    [0, 1, 2],
-    [3, 4, 5],
-    [6, 7, 8],
-    [0, 3, 6],
-    [1, 4, 7],
-    [2, 5, 8],
-    [0, 4, 8],
-    [2, 4, 6],
-  ];
-  for (let line of lines) {
-    const [a, b, c] = line;
-    if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-      return squares[a];
-    }
-  }
-  return null;
-}
-
-export default localPlay;
+export default LocalPlay;

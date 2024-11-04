@@ -1,15 +1,16 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import "./App.css";
 
 function HomePage() {
   const navigate = useNavigate();
 
   const handleClick1 = () => {
-    navigate("/localplay");
+    navigate("/localPlay");
   };
 
   const handleClick2 = () => {
-    navigate("/onlineplay");
+    navigate("/onlinePlay");
   };
 
   return (
