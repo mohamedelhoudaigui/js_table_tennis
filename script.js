@@ -29,6 +29,7 @@ const LeftUp = "w"
 const LeftDown = "s"
 
 let GameEnd = false
+let MatchEnd = false
 
 
 // Classes :
@@ -47,6 +48,15 @@ class Ball {
 
 		this.canvas = canvas
 		this.context = canvas.context
+	}
+
+	Reset(x, y, raduis, VelocityX, VelocityY)
+	{
+		this.x = x
+		this.y = y
+		this.raduis = raduis
+		this.VelocityX = VelocityX
+		this.VelocityY = VelocityY
 	}
 
 	Draw()
@@ -118,6 +128,15 @@ class Racket {
         })
 	}
 
+	Reset (x, y, width, height, Velocity)
+	{
+		this.x = x
+		this.y = y
+		this.width = width
+		this.height = height
+		this.Velocity = Velocity
+	}
+
 	Draw()
 	{
 		this.context.fillStyle = this.color
@@ -179,23 +198,22 @@ class Player {
 
 class Match {
 
-	constructor (PlayerOne, PlayerTwo)
+	constructor (PlayerOne, PlayerTwo, MatchSet)
 	{
 		this.PlayerOne = PlayerOne
 		this.PlayerTwo = PlayerTwo
-		this.MatchSet = 8
+		this.MatchSet = MatchSet
 		this.MatchCounter = 0
 	}
 
 	
 	StartGame()
 	{
-		this.GameLogic(this.Winner, this.PlayerOne, this.PlayerTwo)
-		// code just runs js doesnt wait for the outcome of the game
-		
+		this.GameLogic(this.Winner, this.PlayerOne, this.PlayerTwo,
+						this.MatchSet, this.MatchCounter)
 	}
 
-	GameLogic (Winner, PlayerOne, PlayerTwo)
+	GameLogic (Winner, PlayerOne, PlayerTwo, MatchSet, MatchCounter)
 	{
 		let c = new Canvas(CanvasWidth, CanvasHeight, CanvasId, ContextType)
 
@@ -214,8 +232,23 @@ class Match {
 									RightUp, RightDown)
 									
 									
-		function GameUpdate()
+		function GameUpdate() // a match is a combination of multiple games
 		{
+			if (MatchCounter >= MatchSet) // checks if the match is over
+			{
+				MatchEnd = true
+				SetWinner()
+			}
+
+			if (GameEnd) // checks if the current game is over
+			{
+				MatchCounter += 1;
+				GameEnd = false
+				ball.Reset(BallStartX, BallStartY, BallRaduis, VelocityX, VelocityY)
+				rightRacket.Reset(c.width - RacketStartX, RacketStartY, RacketWidth, RacketHeight, RacketVelocity)
+				leftRacket.Reset(RacketStartX, RacketStartY, RacketWidth, RacketHeight, RacketVelocity)
+			}
+
 			ball.CheckCollitionWall()
 			ball.CheckCollitionRacket(rightRacket, leftRacket)
 			ball.UpdatePosition()
@@ -240,14 +273,13 @@ class Match {
 				Winner = PlayerOne.UserName
 			else
 				Winner = "Draw"
+			console.log(Winner)
 		}
 
 		function GameLoop()
 		{
-			if (!GameEnd)
+			if (!MatchEnd)
 				window.requestAnimationFrame(GameLoop)
-			else
-				SetWinner()
 			GameUpdate()
 			GameDraw()
 		}
@@ -260,5 +292,5 @@ class Match {
 const one = new Player(1, "Mohamed")
 const two = new Player(2, "Yassine")
 
-const match = new Match(one, two)
+const match = new Match(one, two, 18)
 match.StartGame()
