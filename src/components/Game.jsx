@@ -4,6 +4,7 @@ import Ball from './Ball';
 import Racket from './Racket';
 
 const Game = () => {
+  const [isAIEnabled, setIsAIEnabled] = useState(true);
   const [ball, setBall] = useState({
     x: 500, y: 250, velocityX: 3, velocityY: 3, radius: 10, color: '#cd202c'
   });
@@ -16,20 +17,59 @@ const Game = () => {
     x: 950, y: 200, width: 10, height: 100, color: '#aaaaaa'
   });
 
+  const moveAIRacket = () => {
+    setRightRacket((prev) => {
+      const direction = ball.y > prev.y + prev.height / 2 ? 1 : -1;
+      let newY = prev.y + direction * 3;
+      newY = Math.max(0, Math.min(newY, 500 - prev.height));
+      return { ...prev, y: newY };
+    });
+  };
+
+  const resetPositions = () => {
+    setBall((prev) => ({
+      ...prev,
+      x: 500,
+      y: 250,
+      velocityX: prev.velocityX * -1,
+      velocityY: 3
+    }));
+    setLeftRacket((prev) => ({ ...prev, y: 200 }));
+    setRightRacket((prev) => ({ ...prev, y: 200 }));
+  };
+
+  useEffect(() => {
+    if (isAIEnabled) {
+      const aiInterval = setInterval(moveAIRacket, 16);
+      return () => clearInterval(aiInterval);
+    }
+  }, [isAIEnabled, ball.y]);
+
   const updateBallPosition = useCallback(() => {
     setBall((prevBall) => {
       let { x, y, velocityX, velocityY } = prevBall;
       x += velocityX;
       y += velocityY;
 
-      // Check collision with walls
       if (y <= 0 || y >= 500) velocityY = -velocityY;
-      
-      // Collision with paddles
-      if (x <= leftRacket.x + leftRacket.width && y >= leftRacket.y && y <= leftRacket.y + leftRacket.height) {
+
+      if (x < 0 || x > 1000) {
+        resetPositions();
+        return prevBall;
+      }
+
+      if (
+        x <= leftRacket.x + leftRacket.width &&
+        y >= leftRacket.y &&
+        y <= leftRacket.y + leftRacket.height
+      ) {
         velocityX = -velocityX;
       }
-      if (x >= rightRacket.x - rightRacket.width && y >= rightRacket.y && y <= rightRacket.y + rightRacket.height) {
+      if (
+        x >= rightRacket.x - rightRacket.width &&
+        y >= rightRacket.y &&
+        y <= rightRacket.y + rightRacket.height
+      ) {
         velocityX = -velocityX;
       }
 
@@ -40,48 +80,49 @@ const Game = () => {
   const moveLeftRacket = (direction) => {
     setLeftRacket((prev) => {
       let newY = prev.y + direction * 4;
-      newY = Math.max(0, Math.min(newY, 500 - prev.height)); // keep within canvas bounds
-      return { ...prev, y: newY };
-    });
-  };
-
-  const moveRightRacket = (direction) => {
-    setRightRacket((prev) => {
-      let newY = prev.y + direction * 4;
       newY = Math.max(0, Math.min(newY, 500 - prev.height));
       return { ...prev, y: newY };
     });
   };
 
-  const draw = useCallback((context) => {
-    context.clearRect(0, 0, 1000, 500);
-    context.fillStyle = "#f1e1e9";
-    context.fillRect(0, 0, 1000, 500);
+  const draw = useCallback(
+    (context) => {
+      context.clearRect(0, 0, 1000, 500);
+      context.fillStyle = '#f1e1e9';
+      context.fillRect(0, 0, 1000, 500);
 
-    // Draw ball
-    context.beginPath();
-    context.fillStyle = ball.color;
-    context.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-    context.fill();
+      context.beginPath();
+      context.fillStyle = ball.color;
+      context.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+      context.fill();
 
-    // Draw left racket
-    context.fillStyle = leftRacket.color;
-    context.fillRect(leftRacket.x, leftRacket.y, leftRacket.width, leftRacket.height);
+      context.fillStyle = leftRacket.color;
+      context.fillRect(leftRacket.x, leftRacket.y, leftRacket.width, leftRacket.height);
 
-    // Draw right racket
-    context.fillStyle = rightRacket.color;
-    context.fillRect(rightRacket.x, rightRacket.y, rightRacket.width, rightRacket.height);
-  }, [ball, leftRacket, rightRacket]);
+      context.fillStyle = rightRacket.color;
+      context.fillRect(rightRacket.x, rightRacket.y, rightRacket.width, rightRacket.height);
+    },
+    [ball, leftRacket, rightRacket]
+  );
 
   return (
     <div>
       <Canvas draw={draw} width={1000} height={500} />
       <Ball x={ball.x} y={ball.y} radius={ball.radius} color={ball.color} updatePosition={updateBallPosition} />
       <Racket x={leftRacket.x} y={leftRacket.y} width={leftRacket.width} height={leftRacket.height} color={leftRacket.color} upKey="w" downKey="s" onMove={moveLeftRacket} />
-      <Racket x={rightRacket.x} y={rightRacket.y} width={rightRacket.width} height={rightRacket.height} color={rightRacket.color} upKey="o" downKey="l" onMove={moveRightRacket} />
+      {!isAIEnabled && (
+        <Racket x={rightRacket.x} y={rightRacket.y} width={rightRacket.width} height={rightRacket.height} color={rightRacket.color} upKey="o" downKey="l" onMove={(dir) => setRightRacket((prev) => ({ ...prev, y: Math.max(0, Math.min(prev.y + dir * 4, 500 - prev.height)) }))} />
+      )}
+      <button onClick={() => setIsAIEnabled(!isAIEnabled)}>
+        {isAIEnabled ? 'Play with Friend' : 'Play with AI'}
+      </button>
     </div>
   );
 };
 
 export default Game;
+
+
+
+
 
