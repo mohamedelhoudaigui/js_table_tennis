@@ -6,15 +6,15 @@ import Racket from './Racket';
 const Game = () => {
   const [isAIEnabled, setIsAIEnabled] = useState(true);
   const [ball, setBall] = useState({
-    x: 500, y: 250, velocityX: 3, velocityY: 3, radius: 10, color: '#cd202c'
+    x: 500, y: 250, velocityX: 4, velocityY: 4, radius: 10, color: '#cd202c'
   });
 
   const [leftRacket, setLeftRacket] = useState({
-    x: 40, y: 200, width: 10, height: 100, color: '#aaaaaa'
+    x: 40, y: 200, width: 10, height: 100, color: '#aaaaaa', velocity: 5,
   });
 
   const [rightRacket, setRightRacket] = useState({
-    x: 950, y: 200, width: 10, height: 100, color: '#aaaaaa'
+    x: 950, y: 200, width: 10, height: 100, color: '#aaaaaa', velocity: 5,
   });
 
   const moveAIRacket = () => {
@@ -79,11 +79,19 @@ const Game = () => {
 
   const moveLeftRacket = (direction) => {
     setLeftRacket((prev) => {
-      let newY = prev.y + direction * 4;
+      let newY = prev.y + direction * prev.velocity;
       newY = Math.max(0, Math.min(newY, 500 - prev.height));
       return { ...prev, y: newY };
     });
   };
+
+  const moveRightRacket = (direction) => {
+    setRightRacket((prev) => {
+      let newY = prev.y + direction * prev.velocity;
+      newY = Math.max(0, Math.min(newY, 500 - prev.height));
+      return { ...prev, y: newY };
+    });
+  }
 
   const draw = useCallback(
     (context) => {
@@ -111,7 +119,7 @@ const Game = () => {
       <Ball x={ball.x} y={ball.y} radius={ball.radius} color={ball.color} updatePosition={updateBallPosition} />
       <Racket x={leftRacket.x} y={leftRacket.y} width={leftRacket.width} height={leftRacket.height} color={leftRacket.color} upKey="w" downKey="s" onMove={moveLeftRacket} />
       {!isAIEnabled && (
-        <Racket x={rightRacket.x} y={rightRacket.y} width={rightRacket.width} height={rightRacket.height} color={rightRacket.color} upKey="o" downKey="l" onMove={(dir) => setRightRacket((prev) => ({ ...prev, y: Math.max(0, Math.min(prev.y + dir * 4, 500 - prev.height)) }))} />
+        <Racket x={rightRacket.x} y={rightRacket.y} width={rightRacket.width} height={rightRacket.height} color={rightRacket.color} upKey="o" downKey="l" onMove={moveRightRacket} />
       )}
       <button onClick={() => setIsAIEnabled(!isAIEnabled)}>
         {isAIEnabled ? 'Play with Friend' : 'Play with AI'}
