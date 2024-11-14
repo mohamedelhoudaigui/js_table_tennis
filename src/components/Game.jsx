@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Canvas from './Canvas';
 import Ball from './Ball';
 import Racket from './Racket';
+import '../App.css';
 
 const Game = () => {
   const [isAIEnabled, setIsAIEnabled] = useState(true);
@@ -10,17 +11,17 @@ const Game = () => {
   });
 
   const [leftRacket, setLeftRacket] = useState({
-    x: 40, y: 200, width: 10, height: 100, color: '#aaaaaa', velocity: 5,
+    x: 40, y: 200, width: 10, height: 100, color: '#33332D', velocity: 5,
   });
 
   const [rightRacket, setRightRacket] = useState({
-    x: 950, y: 200, width: 10, height: 100, color: '#aaaaaa', velocity: 5,
+    x: 950, y: 200, width: 10, height: 100, color: '#33332D', velocity: 5,
   });
 
   const moveAIRacket = () => {
     setRightRacket((prev) => {
       const direction = ball.y > prev.y + prev.height / 2 ? 1 : -1;
-      let newY = prev.y + direction * 3;
+      let newY = prev.y + direction * prev.velocity;
       newY = Math.max(0, Math.min(newY, 500 - prev.height));
       return { ...prev, y: newY };
     });

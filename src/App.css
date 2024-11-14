@@ -9,6 +9,13 @@ body {
   height: 100vh;
 }
 
+canvas {
+  display: block;
+  margin: auto;
+  background-color: #ffffff;
+  border-radius: 8px;
+}
+
 h1 {
   color: #333;
   text-align: center;
